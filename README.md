@@ -97,11 +97,23 @@ Profile YOLOv8n vs YOLOv8s vs YOLOv8m and generate comparison graphs:
 python benchmark_models.py
 ```
 
-### 3. Launch Interactive Streamlit Dashboard
-Launch the interactive web UI with real-time video playback and charts:
+### 3. Launch the Mission-Critical Surveillance Console (React + FastAPI)
+High-performance Air-Traffic-Control style console with dual-canvas rendering, atomic WebSocket binary streaming, and live vector overlays:
+```bash
+# Terminal 1: Start FastAPI WebSocket Engine
+python server.py
+
+# Terminal 2: Start Vite React Frontend
+cd frontend
+npm run dev
+```
+Open **`http://localhost:5173`** in your browser.
+
+### 4. Launch Legacy Streamlit Dashboard
 ```bash
 streamlit run app.py
 ```
+
 
 ---
 
