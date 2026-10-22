@@ -18,7 +18,6 @@ from src.detector import TrafficDetector
 from src.logger import TrafficLogger
 from src.visualizer import Visualizer
 
-# Page Configuration
 st.set_page_config(
     page_title="Urban Surveillance & Traffic Monitoring",
     page_icon="🚦",
@@ -26,7 +25,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom Styling
+
 st.markdown(
     """
     <style>
@@ -67,14 +66,20 @@ def main():
     with st.sidebar:
         st.header("⚙️ Surveillance Controls")
 
-        st.subheader("1. Video Source")
         source_mode = st.radio(
             "Select Feed Source",
-            ["Preset: Highway Traffic", "Preset: Urban Multi-Class", "Upload Custom Video"],
+            [
+                "Preset: Busy Multi-Lane Traffic (High Flow)",
+                "Preset: Urban Multi-Class",
+                "Preset: Highway Traffic",
+                "Upload Custom Video",
+            ],
         )
 
         video_path = None
-        if source_mode == "Preset: Highway Traffic":
+        if source_mode == "Preset: Busy Multi-Lane Traffic (High Flow)":
+            video_path = "data/busy_traffic.mp4"
+        elif source_mode == "Preset: Highway Traffic":
             video_path = "data/car_detection.mp4"
         elif source_mode == "Preset: Urban Multi-Class":
             video_path = "data/traffic_sample.mp4"
@@ -179,7 +184,6 @@ def main():
 
                 writer.write(annotated)
 
-                # Update live KPIs periodically
                 if frame_idx % 4 == 0 or frame_idx == limit - 1:
                     rgb_frame = cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB)
                     video_frame_placeholder.image(rgb_frame, channels="RGB", use_container_width=True)
@@ -204,9 +208,9 @@ def main():
             st.session_state["log_csv"] = logger.csv_path
             st.session_state["output_mp4"] = output_mp4
         else:
-            st.info("👈 Select your video source and parameters in the sidebar, then click **'Run Live Analysis'**.")
+            st.info(" Select your video source and parameters in the sidebar, then click **'Run Live Analysis'**.")
 
-            # Display last processed video if available
+           
             if os.path.exists("outputs/annotated_traffic_monitoring.mp4"):
                 st.subheader("Latest Processed Surveillance Output")
                 st.video("outputs/annotated_traffic_monitoring.mp4")

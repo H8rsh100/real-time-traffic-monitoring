@@ -40,6 +40,12 @@ MAGIC_BYTES = b"SURV"
 async def get_status():
     """System health check and available assets."""
     presets = []
+    if os.path.exists("data/busy_traffic.mp4"):
+        presets.append({
+            "id": "busy",
+            "name": "Busy Multi-Lane Traffic (High Flow)",
+            "path": "data/busy_traffic.mp4",
+        })
     if os.path.exists("data/traffic_sample.mp4"):
         presets.append({
             "id": "urban",

@@ -42,29 +42,41 @@ export const ControlRail: React.FC<ControlRailProps> = ({
           <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
             FEED SOURCE
           </label>
-          <div className="grid grid-cols-2 gap-1 text-[11px]">
+          <div className="grid grid-cols-3 gap-1 text-[11px]">
+            <button
+              onClick={() => onChangeConfig({ source: 'data/busy_traffic.mp4' })}
+              className={`px-1.5 py-1.5 text-left border cursor-pointer transition-colors ${
+                config.source.includes('busy_traffic')
+                  ? 'bg-[#181C24] border-[#FF5A1F] text-neutral-100'
+                  : 'bg-[#121419] border-[rgba(255,255,255,0.08)] text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <div className="text-[10px] font-semibold">BUSY</div>
+              <div className="text-[8px] text-neutral-400">High Traffic</div>
+            </button>
+
             <button
               onClick={() => onChangeConfig({ source: 'data/traffic_sample.mp4' })}
-              className={`px-2 py-1.5 text-left border cursor-pointer transition-colors ${
+              className={`px-1.5 py-1.5 text-left border cursor-pointer transition-colors ${
                 config.source.includes('traffic_sample')
                   ? 'bg-[#181C24] border-[#FF5A1F] text-neutral-100'
                   : 'bg-[#121419] border-[rgba(255,255,255,0.08)] text-neutral-400 hover:text-neutral-200'
               }`}
             >
               <div className="text-[10px] font-semibold">URBAN</div>
-              <div className="text-[9px] text-neutral-400">Ped / Cyc / Veh</div>
+              <div className="text-[8px] text-neutral-400">Multi-Class</div>
             </button>
 
             <button
               onClick={() => onChangeConfig({ source: 'data/car_detection.mp4' })}
-              className={`px-2 py-1.5 text-left border cursor-pointer transition-colors ${
+              className={`px-1.5 py-1.5 text-left border cursor-pointer transition-colors ${
                 config.source.includes('car_detection')
                   ? 'bg-[#181C24] border-[#FF5A1F] text-neutral-100'
                   : 'bg-[#121419] border-[rgba(255,255,255,0.08)] text-neutral-400 hover:text-neutral-200'
               }`}
             >
               <div className="text-[10px] font-semibold">HIGHWAY</div>
-              <div className="text-[9px] text-neutral-400">Cars Flow</div>
+              <div className="text-[8px] text-neutral-400">Cars Flow</div>
             </button>
           </div>
         </div>

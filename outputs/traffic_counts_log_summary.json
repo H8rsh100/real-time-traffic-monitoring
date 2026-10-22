@@ -1,25 +1,24 @@
 {
-    "total_crossed": 2,
-    "total_in": 0,
-    "total_out": 2,
+    "total_crossed": 11,
+    "total_in": 11,
+    "total_out": 0,
     "counts_by_category": {
-        "Vehicle": 1,
-        "Pedestrian": 1,
+        "Vehicle": 11,
+        "Pedestrian": 0,
         "Cyclist": 0,
         "Other": 0
     },
     "counts_by_class": {
-        "person": 1,
-        "bus": 1
+        "car": 11
     },
-    "current_roi_occupancy": 0,
-    "total_unique_tracked": 10,
-    "processed_frames": 647,
-    "video_duration_sec": 53.92,
-    "total_processing_time_sec": 88.3,
-    "average_fps": 7.33,
-    "average_latency_ms": 127.67,
+    "current_roi_occupancy": 1,
+    "total_unique_tracked": 27,
+    "processed_frames": 335,
+    "video_duration_sec": 11.18,
+    "total_processing_time_sec": 25.67,
+    "average_fps": 13.05,
+    "average_latency_ms": 68.2,
     "model_used": "yolov8n.pt",
-    "output_video_path": "outputs/annotated_traffic_monitoring.mp4",
+    "output_video_path": "outputs/annotated_busy_traffic.mp4",
     "log_csv_path": "outputs\\traffic_counts_log.csv"
 }
