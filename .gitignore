@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyTorch weights & checkpoints (downloaded automatically on first run)
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Video media files (large binaries)
+*.mp4
+*.avi
+*.mov
+*.mkv
+data/*.mp4
+outputs/*.mp4
+outputs/*.avi
+
+# Preserve benchmark charts, CSV telemetry, and JSON summaries
+!outputs/*.png
+!outputs/*.csv
+!outputs/*.json
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
