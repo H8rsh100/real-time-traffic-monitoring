@@ -1,0 +1,4 @@
+model_name,weights_file,model_size_mb,parameters_m,mean_preprocess_ms,mean_inference_ms,mean_postprocess_ms,mean_total_latency_ms,throughput_fps,total_detections,mean_confidence
+YOLOv8n (Nano),yolov8n.pt,6.25,3.16,3.21,108.3,1.06,112.57,8.88,0,0.0
+YOLOv8s (Small),yolov8s.pt,21.54,11.17,3.47,203.46,1.13,208.06,4.81,0,0.0
+YOLOv8m (Medium),yolov8m.pt,49.72,25.9,3.73,484.07,1.3,489.11,2.04,2,0.488

@@ -1,0 +1,41 @@
+[
+    {
+        "model_name": "YOLOv8n (Nano)",
+        "weights_file": "yolov8n.pt",
+        "model_size_mb": 6.25,
+        "parameters_m": 3.16,
+        "mean_preprocess_ms": 3.21,
+        "mean_inference_ms": 108.3,
+        "mean_postprocess_ms": 1.06,
+        "mean_total_latency_ms": 112.57,
+        "throughput_fps": 8.88,
+        "total_detections": 0,
+        "mean_confidence": 0.0
+    },
+    {
+        "model_name": "YOLOv8s (Small)",
+        "weights_file": "yolov8s.pt",
+        "model_size_mb": 21.54,
+        "parameters_m": 11.17,
+        "mean_preprocess_ms": 3.47,
+        "mean_inference_ms": 203.46,
+        "mean_postprocess_ms": 1.13,
+        "mean_total_latency_ms": 208.06,
+        "throughput_fps": 4.81,
+        "total_detections": 0,
+        "mean_confidence": 0.0
+    },
+    {
+        "model_name": "YOLOv8m (Medium)",
+        "weights_file": "yolov8m.pt",
+        "model_size_mb": 49.72,
+        "parameters_m": 25.9,
+        "mean_preprocess_ms": 3.73,
+        "mean_inference_ms": 484.07,
+        "mean_postprocess_ms": 1.3,
+        "mean_total_latency_ms": 489.11,
+        "throughput_fps": 2.04,
+        "total_detections": 2,
+        "mean_confidence": 0.488
+    }
+]

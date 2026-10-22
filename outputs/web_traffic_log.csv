@@ -1,0 +1,1 @@
+Event_ID,Timestamp_Sec,Frame_Index,Track_ID,Class_Name,Category,Confidence,Direction,Centroid_X,Centroid_Y,BBox_X1,BBox_Y1,BBox_X2,BBox_Y2
