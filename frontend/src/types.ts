@@ -77,3 +77,17 @@ export interface BenchmarkModel {
   mean_total_latency_ms: number;
   throughput_fps: number;
 }
+
+export type ExposureDecay = 'short' | 'medium' | 'long';
+export type RenderMode = 'smooth' | 'raw';
+export type ViewportStatus = 'STANDBY' | 'CONNECTING' | 'STREAMING' | 'PAUSED' | 'REPLAY' | 'SIGNAL_LOST';
+
+export interface LensFlare {
+  id: string;
+  x: number;
+  y: number;
+  color: string;
+  direction: Direction;
+  createdAt: number;
+}
+
