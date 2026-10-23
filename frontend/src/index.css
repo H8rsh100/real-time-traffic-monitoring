@@ -1,85 +1,137 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --bg-root: #0A0B0D;
-    --bg-surface: #111318;
-    --bg-elevated: #161920;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.18);
-    --signal-orange: #FF5A1F;
-    --text-primary: #EDEDED;
-    --text-secondary: #8A909E;
-    --text-muted: #565C69;
-    --cat-vehicle: #8E9DAE;
-    --cat-pedestrian: #8EA695;
-    --cat-cyclist: #B5A078;
+@theme {
+  --font-sans: "Bricolage Grotesque", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Bricolage Grotesque", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Martian Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-night: #05060A;
+  --color-asphalt: #0A0C12;
+  --color-panel: rgba(12, 14, 22, 0.66);
+  --color-line: rgba(236, 232, 246, 0.09);
+  --color-ink: #ECE8F6;
+  --color-mute: #8A90A6;
+  --color-violet: #7F5AF0;
+
+  --color-headlight: #FFF1CC;
+  --color-taillight: #FF3B30;
+  --color-vehicle-amber: #FFB347;
+  --color-pedestrian: #4FD1FF;
+  --color-cyclist: #B6FF4F;
+  --color-gate: rgba(255, 255, 255, 0.9);
+}
+
+:root {
+  --night: #05060A;
+  --asphalt: #0A0C12;
+  --panel: rgba(12, 14, 22, 0.66);
+  --line: rgba(236, 232, 246, 0.09);
+  --ink: #ECE8F6;
+  --mute: #8A90A6;
+  --violet: #7F5AF0;
+
+  --headlight: #FFF1CC;
+  --taillight: #FF3B30;
+  --vehicle-amber: #FFB347;
+  --pedestrian: #4FD1FF;
+  --cyclist: #B6FF4F;
+  --gate: rgba(255, 255, 255, 0.9);
+}
+
+body {
+  background-color: var(--night);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Martian Mono Tabular Data class */
+.font-mono-numbers,
+.font-mono-data {
+  font-family: "Martian Mono", monospace !important;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glass panel */
+.glass-panel {
+  background: rgba(12, 14, 22, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(236, 232, 246, 0.09);
+}
+
+/* Focus ring standard */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
+/* Anamorphic Lens Flare Keyframes */
+@keyframes anamorphicFlare {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.1);
   }
-
-  body {
-    background-color: var(--bg-root);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    user-select: none;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  30% {
+    opacity: 1;
+    transform: scaleX(1);
   }
-
-  /* Monospace & Tabular figures everywhere */
-  .font-mono-numbers {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-    font-feature-settings: "tnum" 1, "zero" 1;
-    font-variant-numeric: tabular-nums;
+  100% {
+    opacity: 0;
+    transform: scaleX(1.4);
   }
 }
 
-/* Subtle CRT Scanlines for NO SIGNAL & Video hero frame */
-.scanlines {
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.25) 50%
-  ), linear-gradient(
-    90deg,
-    rgba(255, 0, 0, 0.03),
-    rgba(0, 255, 0, 0.01),
-    rgba(0, 0, 255, 0.03)
-  );
-  background-size: 100% 3px, 6px 100%;
+.flare-active {
+  animation: anamorphicFlare 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Static noise animation */
-@keyframes noise {
-  0%, 100% { background-position: 0 0; }
-  10% { background-position: -5% -10%; }
-  20% { background-position: -15% 5%; }
-  30% { background-position: 7% -25%; }
-  40% { background-position: 20% 25%; }
-  50% { background-position: -25% 10%; }
-  60% { background-position: 15% 5%; }
-  70% { background-position: 0% 15%; }
-  80% { background-position: 25% 35%; }
-  90% { background-position: -10% 10%; }
+/* Subtle breathing pulse for REC / LIVE indicators */
+@keyframes breathe {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.92);
+  }
 }
 
-.no-signal-static {
-  background-image: repeating-radial-gradient(circle at 17% 32%, #181b22, #0d0f12 0.00085px);
-  animation: noise 0.2s infinite steps(2);
+.animate-breathe {
+  animation: breathe 2.4s ease-in-out infinite;
 }
 
-/* Custom minimal scrollbar */
+/* Custom Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d0f13;
+  background: #05060A;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(236, 232, 246, 0.12);
+  border-radius: 1px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(236, 232, 246, 0.28);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
