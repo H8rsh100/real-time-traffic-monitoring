@@ -82,12 +82,26 @@ export const HeroViewport: React.FC<HeroViewportProps> = ({
         return;
       }
 
+      const curBmp = currentBitmapRef.current;
+      const prevBmp = prevBitmapRef.current;
+
+      // Dynamically sync canvas resolutions to exact video frame dimensions
+      if (curBmp && (videoCanvas.width !== curBmp.width || videoCanvas.height !== curBmp.height)) {
+        videoCanvas.width = curBmp.width;
+        videoCanvas.height = curBmp.height;
+        exposureCanvas.width = curBmp.width;
+        exposureCanvas.height = curBmp.height;
+        hudCanvas.width = curBmp.width;
+        hudCanvas.height = curBmp.height;
+
+        offscreen.width = Math.round(curBmp.width / 2);
+        offscreen.height = Math.round(curBmp.height / 2);
+      }
+
       const w = videoCanvas.width;
       const h = videoCanvas.height;
       const curTelem = currentTelemetryRef.current;
       const prevTelem = prevTelemetryRef.current;
-      const curBmp = currentBitmapRef.current;
-      const prevBmp = prevBitmapRef.current;
 
       // ─────────────────────────────────────────────────────────────
       // 1. LAYER 1: VIDEO CANVAS (With optional crossfade in Smooth Mode)

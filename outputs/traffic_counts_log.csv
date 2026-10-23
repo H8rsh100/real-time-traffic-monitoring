@@ -1,1 +1,2 @@
 Event_ID,Timestamp_Sec,Frame_Index,Track_ID,Class_Name,Category,Confidence,Direction,Centroid_X,Centroid_Y,BBox_X1,BBox_Y1,BBox_X2,BBox_Y2
+1,26.64,333,25,car,Vehicle,0.490,IN,216,226,94,59,339,393

@@ -28,14 +28,17 @@ class TrafficDetector:
     """
 
     # Primary target COCO classes:
-    # 0: person, 1: bicycle, 2: car, 3: motorcycle, 5: bus, 7: truck
+    # 0: person, 1: bicycle, 2: car, 3: motorcycle, 5: bus, 6: train, 7: truck, 8: boat, 67: cell phone (overhead car roof heuristic)
     COCO_TARGETS = {
         0: ("person", "Pedestrian"),
         1: ("bicycle", "Cyclist"),
         2: ("car", "Vehicle"),
         3: ("motorcycle", "Vehicle"),
         5: ("bus", "Vehicle"),
+        6: ("train", "Vehicle"),
         7: ("truck", "Vehicle"),
+        8: ("boat", "Vehicle"),
+        67: ("cell phone", "Vehicle"),
     }
 
     def __init__(
@@ -104,10 +107,21 @@ class TrafficDetector:
             x1, y1, x2, y2 = bbox
             cx = int((x1 + x2) / 2)
             cy = int((y1 + y2) / 2)
+            bw = x2 - x1
+            bh = y2 - y1
 
-            class_name, category = self.COCO_TARGETS.get(
-                cls_id, (self.names.get(cls_id, str(cls_id)), "Other")
-            )
+            # Overhead drone/CCTV vehicle heuristic:
+            # Top-down cars are frequently misclassified by standard COCO YOLO models as
+            # 'cell phone' (class 67) due to rectangular white roofs and black glass borders.
+            # In surveillance traffic monitoring, large objects (> 50x50 px) are vehicles.
+            if cls_id == 67 and (bw > 50 and bh > 50):
+                class_name = "car"
+                category = "Vehicle"
+                cls_id = 2
+            else:
+                class_name, category = self.COCO_TARGETS.get(
+                    cls_id, (self.names.get(cls_id, str(cls_id)), "Other")
+                )
 
             detections.append(
                 Detection(
