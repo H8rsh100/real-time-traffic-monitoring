@@ -1,0 +1,12 @@
+__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+.github
+node_modules
+dist
+outputs/*.mp4
+outputs/*.avi
+outputs/*.csv
+.tempmediaStorage
