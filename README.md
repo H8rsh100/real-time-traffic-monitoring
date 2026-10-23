@@ -1,5 +1,11 @@
 # Real-Time Traffic & Pedestrian Monitoring System (YOLOv8 + OpenCV)
 
+[![CI Pipeline](https://github.com/H8rsh100/real-time-traffic-monitoring/actions/workflows/ci.yml/badge.svg)](https://github.com/H8rsh100/real-time-traffic-monitoring/actions/workflows/ci.yml)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
+[![React](https://img.shields.io/badge/React-19.3-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.3-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+
 An enterprise-grade computer vision and intelligent surveillance pipeline for urban traffic analysis, automated vehicle/pedestrian detection, multi-object tracking, and directional gate crossing telemetry.
 
 Developed for **Assignment 2: Real-Time Traffic & Pedestrian Monitoring (Object Detection)**.
@@ -15,6 +21,7 @@ Developed for **Assignment 2: Real-Time Traffic & Pedestrian Monitoring (Object 
 | **3. Annotated Surveillance Video** | Output video with bounding boxes, confidence badges, motion trails, active crossing alerts, and real-time HUD telemetry | [`outputs/annotated_traffic_monitoring.mp4`](file:///c:/daidai/outputs/annotated_traffic_monitoring.mp4) | **Complete** ✅ |
 | **4. Inference Speed vs Model Size Analysis** | Formal benchmark profiling **YOLOv8n vs YOLOv8s vs YOLOv8m** with FPS, latency breakdown, parameter count, and publication charts | [`benchmark_models.py`](file:///c:/daidai/benchmark_models.py), [`outputs/fps_vs_modelsize.png`](file:///c:/daidai/outputs/fps_vs_modelsize.png) | **Complete** ✅ |
 | **5. Interactive Web Dashboard** | Streamlit web application with live video processing, parameter tuning, telemetry charts, and CSV data export | [`app.py`](file:///c:/daidai/app.py) | **Complete** ✅ |
+| **6. Long Exposure Telemetry Console** | High-performance React 19 + Vite 8 three-layer photographic canvas console with additive light exposure, 60Hz smooth mode, and binary WebSockets | [`frontend/`](file:///c:/daidai/frontend) | **Complete** ✅ |
 
 ---
 
