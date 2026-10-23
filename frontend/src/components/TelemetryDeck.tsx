@@ -1,140 +1,139 @@
 import React, { useRef, useEffect } from 'react';
-import type { CategoryCounts } from '../types';
 
 interface TelemetryDeckProps {
-  counts: CategoryCounts;
+  vehicleCount: number;
+  pedestrianCount: number;
+  cyclistCount: number;
+  fps: number;
+  latencyMs: number;
 }
 
-// Minimal Sparkline SVG Component (No chart libraries)
-const MiniSparkline: React.FC<{ history: number[]; color: string }> = ({ history, color }) => {
-  if (history.length < 2) {
-    return <div className="h-6 w-full bg-neutral-900/30 border-b border-neutral-800" />;
-  }
-
-  const max = Math.max(...history, 1);
-  const min = Math.min(...history, 0);
-  const range = max - min || 1;
-  const w = 120;
-  const h = 24;
-
-  const points = history
-    .map((val, i) => {
-      const x = (i / (history.length - 1)) * w;
-      const y = h - ((val - min) / range) * (h - 4) - 2;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
-
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-6 overflow-visible">
-      <polyline fill="none" stroke={color} strokeWidth="1.2" points={points} />
-    </svg>
-  );
-};
-
-export const TelemetryDeck: React.FC<TelemetryDeckProps> = ({ counts }) => {
-  // Sparkline history buffers
-  const totalHistRef = useRef<number[]>([]);
-  const vehHistRef = useRef<number[]>([]);
-  const pedHistRef = useRef<number[]>([]);
-  const cycHistRef = useRef<number[]>([]);
+export const TelemetryDeck: React.FC<TelemetryDeckProps> = ({
+  vehicleCount,
+  pedestrianCount,
+  cyclistCount,
+  fps,
+  latencyMs,
+}) => {
+  // Sparkline history buffers (30 samples)
+  const vehHistory = useRef<number[]>(Array(30).fill(0));
+  const pedHistory = useRef<number[]>(Array(30).fill(0));
+  const cycHistory = useRef<number[]>(Array(30).fill(0));
+  const fpsHistory = useRef<number[]>(Array(30).fill(fps || 13));
 
   useEffect(() => {
-    const pushHist = (ref: React.MutableRefObject<number[]>, val: number) => {
-      ref.current.push(val);
-      if (ref.current.length > 30) ref.current.shift();
-    };
+    vehHistory.current = [...vehHistory.current.slice(1), vehicleCount];
+    pedHistory.current = [...pedHistory.current.slice(1), pedestrianCount];
+    cycHistory.current = [...cycHistory.current.slice(1), cyclistCount];
+    fpsHistory.current = [...fpsHistory.current.slice(1), fps];
+  }, [vehicleCount, pedestrianCount, cyclistCount, fps]);
 
-    pushHist(totalHistRef, counts.total);
-    pushHist(vehHistRef, counts.vehicle);
-    pushHist(pedHistRef, counts.pedestrian);
-    pushHist(cycHistRef, counts.cyclist);
-  }, [counts]);
+  const renderSparkline = (data: number[], color: string, glowColor: string) => {
+    const max = Math.max(...data, 1);
+    const min = Math.min(...data, 0);
+    const range = max - min || 1;
+    const w = 120;
+    const h = 28;
 
-  const total = counts.total || 0;
-  const vehShare = total > 0 ? ((counts.vehicle / total) * 100).toFixed(0) : '0';
-  const pedShare = total > 0 ? ((counts.pedestrian / total) * 100).toFixed(0) : '0';
-  const cycShare = total > 0 ? ((counts.cyclist / total) * 100).toFixed(0) : '0';
+    const points = data
+      .map((val, i) => {
+        const x = (i / (data.length - 1)) * w;
+        const y = h - ((val - min) / range) * (h - 6) - 3;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+
+    return (
+      <svg className="w-full h-7 overflow-visible" viewBox={`0 0 ${w} ${h}`}>
+        <defs>
+          <filter id={`glow-${color.replace('#', '')}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor={glowColor} floodOpacity="0.6" />
+          </filter>
+        </defs>
+        <polyline
+          fill="none"
+          stroke={color}
+          strokeWidth="1.5"
+          points={points}
+          filter={`url(#glow-${color.replace('#', '')})`}
+        />
+      </svg>
+    );
+  };
+
+  const cards = [
+    {
+      label: 'VEHICLES // INBOUND & OUT',
+      glyph: '▲',
+      value: vehicleCount,
+      sub: 'Multi-lane traffic flow',
+      color: '#FFB347',
+      glow: '#FFB347',
+      data: vehHistory.current,
+    },
+    {
+      label: 'PEDESTRIANS // CROSSWALK',
+      glyph: '●',
+      value: pedestrianCount,
+      sub: 'Zebra crossing zone',
+      color: '#4FD1FF',
+      glow: '#4FD1FF',
+      data: pedHistory.current,
+    },
+    {
+      label: 'CYCLISTS // BIKE CORRIDOR',
+      glyph: '◆',
+      value: cyclistCount,
+      sub: 'Lateral lane filter',
+      color: '#B6FF4F',
+      glow: '#B6FF4F',
+      data: cycHistory.current,
+    },
+    {
+      label: 'ENGINE THROUGHPUT',
+      glyph: '⚡',
+      value: `${fps.toFixed(1)} FPS`,
+      sub: `${latencyMs}ms forward latency`,
+      color: '#7F5AF0',
+      glow: '#7F5AF0',
+      data: fpsHistory.current,
+    },
+  ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 font-mono-numbers select-none">
-      {/* 1. Total Gate Count */}
-      <div className="bg-[#101216] border border-[rgba(255,255,255,0.08)] p-2.5 flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
-            TOTAL GATE FLOW
-          </span>
-          <span className="text-[9px] text-[#FF5A1F] font-semibold">
-            ▲ {counts.in} IN / ▼ {counts.out} OUT
-          </span>
+    <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 font-mono-data select-none">
+      {cards.map((card, i) => (
+        <div
+          key={i}
+          className="relative bg-[#0C0E16]/75 backdrop-blur-md border border-[rgba(236,232,246,0.09)] p-3.5 flex flex-col justify-between overflow-hidden"
+        >
+          {/* Top Label with Class Glyph */}
+          <div className="flex items-center justify-between pb-2 border-b border-[rgba(236,232,246,0.06)]">
+            <span className="text-[10px] uppercase tracking-wider text-[#8A90A6] flex items-center space-x-1.5">
+              <span style={{ color: card.color }}>{card.glyph}</span>
+              <span>{card.label}</span>
+            </span>
+          </div>
+
+          {/* Odometer readout + Sparkline */}
+          <div className="py-2.5 flex items-baseline justify-between">
+            <span
+              className="text-2xl lg:text-3xl font-bold tracking-tight text-[#ECE8F6]"
+              style={{ textShadow: `0 0 16px ${card.color}25` }}
+            >
+              {card.value}
+            </span>
+            <div className="w-24 lg:w-28 opacity-85">
+              {renderSparkline(card.data, card.color, card.glow)}
+            </div>
+          </div>
+
+          {/* Subtitle / Context */}
+          <div className="text-[10px] text-[#8A90A6] tracking-wide pt-1 border-t border-[rgba(236,232,246,0.04)]">
+            {card.sub}
+          </div>
         </div>
-
-        <div className="my-1.5 flex items-baseline justify-between">
-          <span className="text-2xl font-mono font-medium tracking-tight text-neutral-100">
-            {String(counts.total).padStart(4, '0')}
-          </span>
-          <span className="text-[10px] text-neutral-400">GATE CROSSINGS</span>
-        </div>
-
-        <MiniSparkline history={totalHistRef.current} color="#FF5A1F" />
-      </div>
-
-      {/* 2. Vehicles */}
-      <div className="bg-[#101216] border border-[rgba(255,255,255,0.08)] p-2.5 flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
-            [▲] VEHICLES
-          </span>
-          <span className="text-[9px] text-neutral-400 font-medium">{vehShare}% SHARE</span>
-        </div>
-
-        <div className="my-1.5 flex items-baseline justify-between">
-          <span className="text-2xl font-mono font-medium tracking-tight text-[#8E9DAE]">
-            {String(counts.vehicle).padStart(4, '0')}
-          </span>
-          <span className="text-[10px] text-neutral-400">CAR / TRK / BUS</span>
-        </div>
-
-        <MiniSparkline history={vehHistRef.current} color="#8E9DAE" />
-      </div>
-
-      {/* 3. Pedestrians */}
-      <div className="bg-[#101216] border border-[rgba(255,255,255,0.08)] p-2.5 flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
-            [●] PEDESTRIANS
-          </span>
-          <span className="text-[9px] text-neutral-400 font-medium">{pedShare}% SHARE</span>
-        </div>
-
-        <div className="my-1.5 flex items-baseline justify-between">
-          <span className="text-2xl font-mono font-medium tracking-tight text-[#8EA695]">
-            {String(counts.pedestrian).padStart(4, '0')}
-          </span>
-          <span className="text-[10px] text-neutral-400">CROSSWALK</span>
-        </div>
-
-        <MiniSparkline history={pedHistRef.current} color="#8EA695" />
-      </div>
-
-      {/* 4. Cyclists */}
-      <div className="bg-[#101216] border border-[rgba(255,255,255,0.08)] p-2.5 flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
-            [◆] CYCLISTS
-          </span>
-          <span className="text-[9px] text-neutral-400 font-medium">{cycShare}% SHARE</span>
-        </div>
-
-        <div className="my-1.5 flex items-baseline justify-between">
-          <span className="text-2xl font-mono font-medium tracking-tight text-[#B5A078]">
-            {String(counts.cyclist).padStart(4, '0')}
-          </span>
-          <span className="text-[10px] text-neutral-400">BIKE LANE</span>
-        </div>
-
-        <MiniSparkline history={cycHistRef.current} color="#B5A078" />
-      </div>
-    </div>
+      ))}
+    </section>
   );
 };

@@ -1,94 +1,105 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
 import type { CrossingEvent } from '../types';
 
 interface EventTickerProps {
   events: CrossingEvent[];
-  onSeek: (frameIdx: number) => void;
+  onSeekToFrame: (frameIdx: number) => void;
 }
 
-export const EventTicker: React.FC<EventTickerProps> = ({ events, onSeek }) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
+export const EventTicker: React.FC<EventTickerProps> = ({ events, onSeekToFrame }) => {
+  const recentEvents = [...events].reverse().slice(0, 50);
 
-  // Auto-scroll to bottom unless hovered
-  useEffect(() => {
-    if (!isHovered && containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
-  }, [events, isHovered]);
+  const formatTime = (sec: number) => {
+    const mins = Math.floor(sec / 60);
+    const s = (sec % 60).toFixed(1);
+    return `${String(mins).padStart(2, '0')}:${String(s).padStart(4, '0')}`;
+  };
+
+  const getClassGlyph = (category: string) => {
+    if (category === 'Pedestrian') return { glyph: '●', color: '#4FD1FF', label: 'PED' };
+    if (category === 'Cyclist') return { glyph: '◆', color: '#B6FF4F', label: 'CYC' };
+    return { glyph: '▲', color: '#FFB347', label: 'VEH' };
+  };
 
   return (
-    <div className="bg-[#101216] border border-[rgba(255,255,255,0.08)] flex flex-col h-full font-mono-numbers text-xs select-none">
-      {/* Ticker Header */}
-      <div className="px-3 py-2 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between">
+    <div className="bg-[#0C0E16]/75 backdrop-blur-md border border-[rgba(236,232,246,0.09)] flex flex-col h-full font-mono-data text-xs select-none">
+      {/* Header */}
+      <div className="px-3.5 py-2.5 border-b border-[rgba(236,232,246,0.06)] flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold">
-            GATE CROSSING TELEMETRY STREAM
-          </span>
-          <span className="text-[9px] px-1 bg-neutral-800 text-neutral-300 font-medium">
-            {events.length} EVENTS
+          <span className="w-1.5 h-1.5 rounded-full bg-[#7F5AF0] shadow-[0_0_8px_#7F5AF0]" />
+          <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-[#8A90A6]">
+            OPTICAL EVENT TICKER
           </span>
         </div>
-        <span className="text-[9px] text-neutral-400">CLICK ROW TO SEEK</span>
+        <span className="text-[9px] px-1.5 py-0.5 bg-[#05060A] text-[#8A90A6] border border-[rgba(236,232,246,0.08)]">
+          {events.length} LOGGED
+        </span>
       </div>
 
-      {/* Stream Terminal Window */}
-      <div
-        ref={containerRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className="flex-grow overflow-y-auto p-2 space-y-1 text-[11px]"
-      >
-        {events.length === 0 ? (
-          <div className="h-32 flex items-center justify-center text-[10px] tracking-wider text-neutral-400 font-mono">
-            AWAITING GATE INTERSECTION EVENTS...
+      {/* Column Headers */}
+      <div className="grid grid-cols-12 px-3 py-1.5 border-b border-[rgba(236,232,246,0.04)] text-[9px] uppercase tracking-wider text-[#8A90A6]/70">
+        <span className="col-span-3">TIME</span>
+        <span className="col-span-2">DIR</span>
+        <span className="col-span-3">CLASS</span>
+        <span className="col-span-2 text-center">TRACK</span>
+        <span className="col-span-2 text-right">CONF</span>
+      </div>
+
+      {/* Event Rows */}
+      <div className="flex-1 overflow-y-auto divide-y divide-[rgba(236,232,246,0.03)] text-[11px]">
+        {recentEvents.length === 0 ? (
+          <div className="h-44 flex flex-col items-center justify-center text-[#8A90A6]/50 text-xs tracking-wider space-y-1">
+            <span>NO GATE CROSSINGS YET</span>
+            <span className="text-[9px]">CROSSING TRIPWIRE LOGS HERE</span>
           </div>
         ) : (
-          events.map((ev, i) => {
-            const timeStr = new Date(ev.timestamp_sec * 1000).toISOString().substr(14, 7);
-            const glyph =
-              ev.category === 'Pedestrian'
-                ? '[● PED]'
-                : ev.category === 'Cyclist'
-                ? '[◆ CYC]'
-                : '[▲ VEH]';
-
-            const colorClass =
-              ev.category === 'Pedestrian'
-                ? 'text-[#8EA695]'
-                : ev.category === 'Cyclist'
-                ? 'text-[#B5A078]'
-                : 'text-[#8E9DAE]';
-
-            const isDirectionIn = ev.direction === 'IN';
+          recentEvents.map((ev, i) => {
+            const classInfo = getClassGlyph(ev.category);
+            const isLatest = i === 0;
 
             return (
               <div
-                key={i}
-                onClick={() => onSeek(ev.frame_idx)}
-                className="px-2 py-1 bg-[#14171E] hover:bg-[#1B202A] border border-[rgba(255,255,255,0.05)] hover:border-[#FF5A1F]/50 flex items-center justify-between cursor-pointer transition-colors"
+                key={`${ev.frame_idx}_${ev.track_id}_${i}`}
+                onClick={() => onSeekToFrame(ev.frame_idx)}
+                className={`grid grid-cols-12 items-center px-3 py-2 cursor-pointer transition-colors duration-150 ${
+                  isLatest
+                    ? 'bg-[#7F5AF0]/10 hover:bg-[#7F5AF0]/20'
+                    : 'hover:bg-[#121520]/80'
+                }`}
               >
-                <div className="flex items-center space-x-2 font-mono">
-                  <span className="text-neutral-400 text-[10px] font-normal">{timeStr}</span>
-                  <span className="text-neutral-300 font-medium">#{String(ev.track_id).padStart(2, '0')}</span>
-                  <span className={`${colorClass} font-semibold text-[10px]`}>{glyph}</span>
-                  <span className="text-neutral-200 uppercase font-medium">{ev.class}</span>
-                </div>
+                {/* Time */}
+                <span className="col-span-3 text-[#8A90A6] text-[10px]">
+                  {formatTime(ev.timestamp_sec)}
+                </span>
 
-                <div className="flex items-center space-x-3 font-mono">
+                {/* Direction Badge */}
+                <span className="col-span-2">
                   <span
-                    className={`text-[10px] font-semibold px-1 py-0.2 ${
-                      isDirectionIn
-                        ? 'text-emerald-400 bg-emerald-950/40 border border-emerald-900/40'
-                        : 'text-amber-400 bg-amber-950/40 border border-amber-900/40'
+                    className={`inline-flex items-center px-1.5 py-0.5 text-[9px] font-semibold border ${
+                      ev.direction === 'IN'
+                        ? 'border-[#FFF1CC]/40 text-[#FFF1CC] bg-[#FFF1CC]/10'
+                        : 'border-[#FF3B30]/40 text-[#FF3B30] bg-[#FF3B30]/10'
                     }`}
                   >
-                    {isDirectionIn ? '▲ IN' : '▼ OUT'}
+                    {ev.direction === 'IN' ? '▲ IN' : '▼ OUT'}
                   </span>
-                  <span className="text-neutral-400 text-[10px]">
-                    {(ev.conf * 100).toFixed(0)}%
-                  </span>
-                </div>
+                </span>
+
+                {/* Class */}
+                <span className="col-span-3 flex items-center space-x-1.5 truncate">
+                  <span style={{ color: classInfo.color }}>{classInfo.glyph}</span>
+                  <span className="text-[#ECE8F6] capitalize">{ev.class}</span>
+                </span>
+
+                {/* Track ID */}
+                <span className="col-span-2 text-center text-[#8A90A6] font-medium">
+                  #{ev.track_id}
+                </span>
+
+                {/* Confidence */}
+                <span className="col-span-2 text-right text-[#8A90A6] text-[10px]">
+                  {(ev.conf * 100).toFixed(0)}%
+                </span>
               </div>
             );
           })

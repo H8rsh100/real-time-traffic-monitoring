@@ -1,5 +1,6 @@
 import React from 'react';
 import type { StreamConfig } from '../hooks/useSurveillanceStream';
+import type { ExposureDecay } from '../types';
 
 interface ControlRailProps {
   config: StreamConfig;
@@ -11,6 +12,10 @@ interface ControlRailProps {
   onPause: () => void;
   onResume: () => void;
   onExportCsv: () => void;
+  exposureDecay: ExposureDecay;
+  onChangeDecay: (decay: ExposureDecay) => void;
+  isExposureEnabled: boolean;
+  onToggleExposure: () => void;
 }
 
 export const ControlRail: React.FC<ControlRailProps> = ({
@@ -23,194 +28,229 @@ export const ControlRail: React.FC<ControlRailProps> = ({
   onPause,
   onResume,
   onExportCsv,
+  exposureDecay,
+  onChangeDecay,
+  isExposureEnabled,
+  onToggleExposure,
 }) => {
   return (
-    <aside className="w-60 xl:w-64 flex-shrink-0 bg-[#0E1014] border-r border-[rgba(255,255,255,0.08)] flex flex-col justify-between font-mono-numbers text-xs select-none p-3 overflow-y-auto">
-      <div className="space-y-5">
+    <aside className="w-64 xl:w-72 flex-shrink-0 bg-[#0C0E16]/85 backdrop-blur-md border-r border-[rgba(236,232,246,0.09)] flex flex-col justify-between font-mono-data text-xs select-none p-3.5 overflow-y-auto">
+      <div className="space-y-4">
         {/* Rail Title */}
-        <div className="pb-2 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.16em] font-semibold text-neutral-400">
-            CONTROL RAIL
+        <div className="pb-2 border-b border-[rgba(236,232,246,0.06)] flex items-center justify-between">
+          <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8A90A6]">
+            OPTICAL CONTROL RAIL
           </span>
-          <span className="text-[9px] px-1 py-0.2 bg-neutral-800 text-neutral-400 border border-neutral-700">
-            REV 1.4
+          <span className="text-[9px] px-1.5 py-0.2 bg-[#05060A] text-[#7F5AF0] border border-[#7F5AF0]/30 font-semibold">
+            CLASS-LEVEL
           </span>
         </div>
 
-        {/* 1. Feed Source */}
+        {/* 1. Feed Source Presets */}
         <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
-            FEED SOURCE
+          <label className="text-[10px] uppercase tracking-wider text-[#8A90A6]">
+            SURVEILLANCE FEED
           </label>
-          <div className="grid grid-cols-3 gap-1 text-[11px]">
-            <button
-              onClick={() => onChangeConfig({ source: 'data/busy_traffic.mp4' })}
-              className={`px-1.5 py-1.5 text-left border cursor-pointer transition-colors ${
-                config.source.includes('busy_traffic')
-                  ? 'bg-[#181C24] border-[#FF5A1F] text-neutral-100'
-                  : 'bg-[#121419] border-[rgba(255,255,255,0.08)] text-neutral-400 hover:text-neutral-200'
-              }`}
-            >
-              <div className="text-[10px] font-semibold">BUSY</div>
-              <div className="text-[8px] text-neutral-400">High Traffic</div>
-            </button>
-
-            <button
-              onClick={() => onChangeConfig({ source: 'data/traffic_sample.mp4' })}
-              className={`px-1.5 py-1.5 text-left border cursor-pointer transition-colors ${
-                config.source.includes('traffic_sample')
-                  ? 'bg-[#181C24] border-[#FF5A1F] text-neutral-100'
-                  : 'bg-[#121419] border-[rgba(255,255,255,0.08)] text-neutral-400 hover:text-neutral-200'
-              }`}
-            >
-              <div className="text-[10px] font-semibold">URBAN</div>
-              <div className="text-[8px] text-neutral-400">Multi-Class</div>
-            </button>
-
-            <button
-              onClick={() => onChangeConfig({ source: 'data/car_detection.mp4' })}
-              className={`px-1.5 py-1.5 text-left border cursor-pointer transition-colors ${
-                config.source.includes('car_detection')
-                  ? 'bg-[#181C24] border-[#FF5A1F] text-neutral-100'
-                  : 'bg-[#121419] border-[rgba(255,255,255,0.08)] text-neutral-400 hover:text-neutral-200'
-              }`}
-            >
-              <div className="text-[10px] font-semibold">HIGHWAY</div>
-              <div className="text-[8px] text-neutral-400">Cars Flow</div>
-            </button>
-          </div>
-        </div>
-
-        {/* 2. Model Tier */}
-        <div className="space-y-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
-            DETECTION ARCHITECTURE
-          </label>
-          <div className="space-y-1 text-[11px]">
+          <div className="grid grid-cols-3 gap-1 text-[10px]">
             {[
-              { id: 'yolov8n.pt', name: 'YOLOv8n (Nano)', fps: '7.76 FPS', size: '6.25 MB' },
-              { id: 'yolov8s.pt', name: 'YOLOv8s (Small)', fps: '5.30 FPS', size: '21.5 MB' },
-              { id: 'yolov8m.pt', name: 'YOLOv8m (Medium)', fps: '1.95 FPS', size: '49.7 MB' },
-            ].map((m) => (
-              <button
-                key={m.id}
-                onClick={() => onChangeConfig({ model: m.id })}
-                className={`w-full px-2 py-1.5 flex items-center justify-between border cursor-pointer transition-colors ${
-                  config.model === m.id
-                    ? 'bg-[#181C24] border-[#FF5A1F] text-neutral-100'
-                    : 'bg-[#121419] border-[rgba(255,255,255,0.08)] text-neutral-400 hover:text-neutral-200'
-                }`}
-              >
-                <span className="font-medium text-[11px]">{m.name}</span>
-                <span className="text-[9px] text-neutral-400">{m.fps}</span>
-              </button>
-            ))}
+              { id: 'data/busy_traffic.mp4', label: 'BUSY', sub: 'Multi-Lane' },
+              { id: 'data/traffic_sample.mp4', label: 'URBAN', sub: 'Crosswalk' },
+              { id: 'data/car_detection.mp4', label: 'HIGHWAY', sub: 'Freeway' },
+            ].map((src) => {
+              const isSelected = config.source.includes(src.id);
+              return (
+                <button
+                  key={src.id}
+                  onClick={() => onChangeConfig({ source: src.id })}
+                  className={`px-1.5 py-2 text-left border cursor-pointer transition-all duration-150 ${
+                    isSelected
+                      ? 'bg-[#141724] border-[#7F5AF0] text-[#ECE8F6] shadow-[0_0_8px_rgba(127,90,240,0.3)]'
+                      : 'bg-[#05060A] border-[rgba(236,232,246,0.08)] text-[#8A90A6] hover:text-[#ECE8F6]'
+                  }`}
+                >
+                  <div className="font-bold tracking-wider">{src.label}</div>
+                  <div className="text-[8px] text-[#8A90A6]/70 truncate">{src.sub}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* 3. Thresholds Sliders */}
-        <div className="space-y-3 pt-1 border-t border-[rgba(255,255,255,0.06)]">
+        {/* 2. Model Tier Selection with Glowing Meters */}
+        <div className="space-y-1.5">
+          <label className="text-[10px] uppercase tracking-wider text-[#8A90A6]">
+            YOLOv8 MODEL ARCHITECTURE
+          </label>
           <div className="space-y-1">
-            <div className="flex justify-between text-[10px]">
-              <span className="text-neutral-400 tracking-wider uppercase">CONFIDENCE (TAU_CONF)</span>
-              <span className="text-neutral-200 font-mono font-medium">{config.conf.toFixed(2)}</span>
-            </div>
-            <input
-              type="range"
-              min="0.10"
-              max="0.80"
-              step="0.05"
-              value={config.conf}
-              onChange={(e) => onChangeConfig({ conf: parseFloat(e.target.value) })}
-              className="w-full accent-[#FF5A1F] bg-neutral-800 h-1 cursor-pointer"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex justify-between text-[10px]">
-              <span className="text-neutral-400 tracking-wider uppercase">NMS IOU (TAU_IOU)</span>
-              <span className="text-neutral-200 font-mono font-medium">{config.iou.toFixed(2)}</span>
-            </div>
-            <input
-              type="range"
-              min="0.20"
-              max="0.75"
-              step="0.05"
-              value={config.iou}
-              onChange={(e) => onChangeConfig({ iou: parseFloat(e.target.value) })}
-              className="w-full accent-[#FF5A1F] bg-neutral-800 h-1 cursor-pointer"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex justify-between text-[10px]">
-              <span className="text-neutral-400 tracking-wider uppercase">COUNTING GATE (Y-POS)</span>
-              <span className="text-neutral-200 font-mono font-medium">
-                {(config.line_ratio * 100).toFixed(0)}%
-              </span>
-            </div>
-            <input
-              type="range"
-              min="0.20"
-              max="0.85"
-              step="0.05"
-              value={config.line_ratio}
-              onChange={(e) => onChangeConfig({ line_ratio: parseFloat(e.target.value) })}
-              className="w-full accent-[#FF5A1F] bg-neutral-800 h-1 cursor-pointer"
-            />
+            {[
+              { id: 'yolov8n.pt', name: 'YOLOv8n (Nano)', params: '3.16M', fps: 7.76, lat: '128.9ms', pct: 100 },
+              { id: 'yolov8s.pt', name: 'YOLOv8s (Small)', params: '11.17M', fps: 5.30, lat: '188.7ms', pct: 68 },
+              { id: 'yolov8m.pt', name: 'YOLOv8m (Medium)', params: '25.90M', fps: 1.95, lat: '511.7ms', pct: 25 },
+            ].map((m) => {
+              const isSelected = config.model === m.id;
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => onChangeConfig({ model: m.id })}
+                  className={`w-full p-2 text-left border cursor-pointer transition-all ${
+                    isSelected
+                      ? 'bg-[#141724] border-[#7F5AF0] text-[#ECE8F6] shadow-[0_0_8px_rgba(127,90,240,0.25)]'
+                      : 'bg-[#05060A] border-[rgba(236,232,246,0.08)] text-[#8A90A6] hover:text-[#ECE8F6]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[11px] font-semibold">
+                    <span>{m.name}</span>
+                    <span className="text-[#FFF1CC]">{m.fps} FPS</span>
+                  </div>
+                  {/* Glowing Meter bar */}
+                  <div className="mt-1.5 h-1 w-full bg-[rgba(236,232,246,0.06)] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#7F5AF0] transition-all duration-300"
+                      style={{ width: `${m.pct}%`, boxShadow: isSelected ? '0 0 6px #7F5AF0' : 'none' }}
+                    />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* 4. Frame Limit */}
-        <div className="space-y-1 pt-1 border-t border-[rgba(255,255,255,0.06)]">
-          <div className="flex justify-between text-[10px]">
-            <span className="text-neutral-400 tracking-wider uppercase">FRAME LIMIT (0 = ALL)</span>
-            <span className="text-neutral-300 font-mono">{config.max_frames}</span>
+        {/* 3. Smooth Mode vs Raw Toggle */}
+        <div className="p-2 border border-[rgba(236,232,246,0.08)] bg-[#05060A] flex items-center justify-between">
+          <span className="text-[10px] uppercase text-[#8A90A6]">INTERPOLATION</span>
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => onChangeConfig({ renderMode: 'raw' })}
+              className={`px-2 py-0.5 text-[9px] border ${
+                config.renderMode === 'raw'
+                  ? 'border-[#ECE8F6] text-[#ECE8F6] bg-[rgba(236,232,246,0.1)]'
+                  : 'border-transparent text-[#8A90A6]'
+              }`}
+            >
+              RAW 13Hz
+            </button>
+            <button
+              onClick={() => onChangeConfig({ renderMode: 'smooth' })}
+              className={`px-2 py-0.5 text-[9px] border font-bold ${
+                config.renderMode === 'smooth'
+                  ? 'border-[#7F5AF0] text-[#7F5AF0] bg-[#7F5AF0]/20 shadow-[0_0_8px_rgba(127,90,240,0.4)]'
+                  : 'border-transparent text-[#8A90A6]'
+              }`}
+            >
+              SMOOTH 60Hz
+            </button>
           </div>
-          <input
-            type="number"
-            min="0"
-            max="1000"
-            step="50"
-            value={config.max_frames}
-            onChange={(e) => onChangeConfig({ max_frames: parseInt(e.target.value) || 0 })}
-            className="w-full bg-[#121419] border border-[rgba(255,255,255,0.1)] px-2 py-1 text-neutral-200 text-xs focus:outline-none focus:border-[#FF5A1F]"
-          />
+        </div>
+
+        {/* 4. Long Exposure Decay Controls */}
+        <div className="p-2 border border-[rgba(236,232,246,0.08)] bg-[#05060A] space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase text-[#8A90A6]">LONG EXPOSURE</span>
+            <button
+              onClick={onToggleExposure}
+              className={`px-1.5 py-0.5 text-[9px] font-bold border ${
+                isExposureEnabled
+                  ? 'border-[#FFF1CC] text-[#FFF1CC] bg-[#FFF1CC]/15 shadow-[0_0_8px_rgba(255,241,204,0.3)]'
+                  : 'border-[rgba(236,232,246,0.1)] text-[#8A90A6]'
+              }`}
+            >
+              {isExposureEnabled ? 'ACTIVE' : 'OFF'}
+            </button>
+          </div>
+
+          {isExposureEnabled && (
+            <div className="grid grid-cols-3 gap-1 pt-1">
+              {(['short', 'medium', 'long'] as ExposureDecay[]).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => onChangeDecay(d)}
+                  className={`py-1 text-[9px] uppercase border text-center ${
+                    exposureDecay === d
+                      ? 'border-[#7F5AF0] text-[#ECE8F6] bg-[#7F5AF0]/20'
+                      : 'border-[rgba(236,232,246,0.06)] text-[#8A90A6]'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 5. Custom Gate Position & Threshold Sliders */}
+        <div className="space-y-2.5 pt-1 border-t border-[rgba(236,232,246,0.06)]">
+          {/* Gate Position with Live Mini Frame Preview */}
+          <div className="space-y-1">
+            <div className="flex justify-between text-[10px]">
+              <span className="text-[#8A90A6]">GATE Y-AXIS</span>
+              <span className="text-[#FFF1CC] font-bold">{(config.line_ratio * 100).toFixed(0)}%</span>
+            </div>
+            {/* Tiny live frame preview */}
+            <div className="relative h-7 w-full bg-[#05060A] border border-[rgba(236,232,246,0.1)] overflow-hidden">
+              <div
+                className="absolute left-0 right-0 h-[1.5px] bg-[#7F5AF0] shadow-[0_0_6px_#7F5AF0]"
+                style={{ top: `${config.line_ratio * 100}%` }}
+              />
+            </div>
+            <input
+              type="range"
+              min={20}
+              max={85}
+              value={Math.round(config.line_ratio * 100)}
+              onChange={(e) => onChangeConfig({ line_ratio: Number(e.target.value) / 100 })}
+              className="w-full h-1 bg-[rgba(236,232,246,0.1)] appearance-none accent-[#7F5AF0] cursor-pointer"
+            />
+          </div>
+
+          {/* Confidence Slider */}
+          <div className="space-y-1">
+            <div className="flex justify-between text-[10px]">
+              <span className="text-[#8A90A6]">CONFIDENCE</span>
+              <span className="text-[#ECE8F6]">{(config.conf * 100).toFixed(0)}%</span>
+            </div>
+            <input
+              type="range"
+              min={15}
+              max={90}
+              value={Math.round(config.conf * 100)}
+              onChange={(e) => onChangeConfig({ conf: Number(e.target.value) / 100 })}
+              className="w-full h-1 bg-[rgba(236,232,246,0.1)] appearance-none accent-[#7F5AF0] cursor-pointer"
+            />
+          </div>
         </div>
       </div>
 
-      {/* 5. Bottom Actions */}
-      <div className="pt-4 border-t border-[rgba(255,255,255,0.08)] space-y-2">
+      {/* Stream Action Controls */}
+      <div className="space-y-2 pt-3 border-t border-[rgba(236,232,246,0.08)]">
         {!isStreaming ? (
           <button
             onClick={onStart}
-            className="w-full py-2 bg-[#FF5A1F] hover:bg-[#E04D18] text-white font-semibold text-xs tracking-wider transition-colors cursor-pointer flex items-center justify-center space-x-2"
+            className="w-full py-2.5 bg-[#7F5AF0] hover:bg-[#6e46e8] text-white font-bold tracking-widest text-xs uppercase cursor-pointer transition-all shadow-[0_0_16px_rgba(127,90,240,0.5)] flex items-center justify-center space-x-2"
           >
-            <span>▶</span>
-            <span>START STREAM</span>
+            <span>▶ START STREAM</span>
           </button>
         ) : (
           <div className="grid grid-cols-2 gap-1.5">
             <button
               onClick={isPaused ? onResume : onPause}
-              className="py-1.5 bg-[#181C24] hover:bg-[#202530] text-neutral-200 border border-[rgba(255,255,255,0.15)] text-[11px] font-medium transition-colors cursor-pointer"
+              className="py-2 bg-[#05060A] border border-[rgba(236,232,246,0.18)] hover:bg-[#12141f] text-[#ECE8F6] font-semibold text-[10px] tracking-wider uppercase cursor-pointer"
             >
-              {isPaused ? 'RESUME' : 'PAUSE'}
+              {isPaused ? '▶ RESUME' : '❚❚ PAUSE'}
             </button>
             <button
               onClick={onStop}
-              className="py-1.5 bg-[#2A1515] hover:bg-[#381B1B] text-red-300 border border-red-900/50 text-[11px] font-medium transition-colors cursor-pointer"
+              className="py-2 bg-[#FF3B30]/15 border border-[#FF3B30] hover:bg-[#FF3B30]/30 text-[#FF3B30] font-semibold text-[10px] tracking-wider uppercase cursor-pointer shadow-[0_0_10px_rgba(255,59,48,0.3)]"
             >
-              STOP
+              ■ STOP
             </button>
           </div>
         )}
 
         <button
           onClick={onExportCsv}
-          className="w-full py-1.5 bg-[#121419] hover:bg-[#181B22] text-neutral-300 border border-[rgba(255,255,255,0.08)] text-[10px] tracking-wider uppercase transition-colors cursor-pointer flex items-center justify-center space-x-1.5"
+          className="w-full py-1.5 bg-[#05060A] border border-[rgba(236,232,246,0.08)] hover:border-[rgba(236,232,246,0.2)] text-[#8A90A6] hover:text-[#ECE8F6] text-[10px] uppercase tracking-wider cursor-pointer transition-colors"
         >
-          <span>EXPORT CSV</span>
+          EXPORT TELEMETRY CSV
         </button>
       </div>
     </aside>

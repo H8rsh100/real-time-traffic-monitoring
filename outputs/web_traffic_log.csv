@@ -1,3 +1,6 @@
 Event_ID,Timestamp_Sec,Frame_Index,Track_ID,Class_Name,Category,Confidence,Direction,Centroid_X,Centroid_Y,BBox_X1,BBox_Y1,BBox_X2,BBox_Y2
-1,4.25,51,1,person,Pedestrian,0.885,OUT,626,233,600,187,653,279
-2,16.5,198,4,car,Vehicle,0.660,OUT,181,237,77,140,286,334
+1,1.94,58,5,car,Vehicle,0.721,IN,578,301,530,249,627,354
+2,1.97,59,3,car,Vehicle,0.793,IN,729,309,668,250,791,368
+3,3.2,96,4,car,Vehicle,0.717,IN,588,308,531,248,646,369
+4,4.3,129,9,car,Vehicle,0.728,IN,747,316,685,253,810,379
+5,4.37,131,14,car,Vehicle,0.612,IN,555,300,502,242,608,358

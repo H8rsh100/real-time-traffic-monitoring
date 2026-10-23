@@ -1,96 +1,97 @@
 import React from 'react';
-import type { CrossingEvent, SessionFrame } from '../types';
+import type { SessionFrame, CrossingEvent } from '../types';
 
 interface TimelineScrubberProps {
-  currentFrameIdx: number;
-  totalFrames: number;
   sessionFrames: SessionFrame[];
   events: CrossingEvent[];
-  replayIndex: number | null;
+  currentIndex: number | null;
   onSeek: (frameIdx: number) => void;
+  isStreaming: boolean;
 }
 
 export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
-  currentFrameIdx,
-  totalFrames,
+  sessionFrames,
   events,
-  replayIndex,
+  currentIndex,
   onSeek,
+  isStreaming,
 }) => {
-  const maxFrames = Math.max(totalFrames, 1);
-  const currentRatio = Math.min(1, Math.max(0, currentFrameIdx / maxFrames));
+  const totalFrames = sessionFrames.length;
 
-  const handleTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const ratio = Math.max(0, Math.min(1, clickX / rect.width));
-    const targetFrame = Math.round(ratio * maxFrames);
-    onSeek(targetFrame);
+  if (totalFrames === 0) return null;
+
+  const currentFrame = currentIndex !== null && sessionFrames[currentIndex]
+    ? sessionFrames[currentIndex]
+    : sessionFrames[totalFrames - 1];
+
+  const currentIdx = currentFrame ? currentFrame.frame_idx : 0;
+  const maxIdx = sessionFrames[totalFrames - 1]?.frame_idx || 1;
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    onSeek(val);
   };
 
   return (
-    <div className="w-full bg-[#0D0F13] border-x border-b border-[rgba(255,255,255,0.08)] px-3 py-1.5 flex items-center space-x-3 font-mono-numbers text-[10px] select-none">
-      {/* Frame Counter Readout */}
-      <div className="flex items-center space-x-1.5 flex-shrink-0 text-neutral-400">
-        <span className="text-[9px] uppercase tracking-wider text-neutral-500">FRAME</span>
-        <span className="text-neutral-200 font-medium">
-          {String(currentFrameIdx).padStart(4, '0')}
-        </span>
-        <span className="text-neutral-600">/</span>
-        <span className="text-neutral-400">{String(totalFrames).padStart(4, '0')}</span>
+    <div className="w-full bg-[#0C0E16]/85 backdrop-blur-md border border-[rgba(236,232,246,0.09)] p-2.5 flex flex-col space-y-1.5 font-mono-data select-none">
+      <div className="flex items-center justify-between text-[10px] text-[#8A90A6]">
+        <div className="flex items-center space-x-2">
+          <span className="text-[#ECE8F6] font-semibold">EXPOSURE TIMELINE</span>
+          <span className="text-[#8A90A6]/40">|</span>
+          <span>FRAME {currentIdx} / {maxIdx}</span>
+        </div>
+
+        <div className="flex items-center space-x-3 text-[10px]">
+          <span className="flex items-center space-x-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FFF1CC] shadow-[0_0_6px_#FFF1CC]" />
+            <span className="text-[#FFF1CC]">▲ IN</span>
+          </span>
+          <span className="flex items-center space-x-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF3B30] shadow-[0_0_6px_#FF3B30]" />
+            <span className="text-[#FF3B30]">▼ OUT</span>
+          </span>
+          <span className="text-[#ECE8F6] font-medium">
+            {currentFrame?.timestamp_sec?.toFixed(2) ?? '0.00'}s
+          </span>
+        </div>
       </div>
 
-      {/* Interactive Timeline Track */}
-      <div
-        onClick={handleTrackClick}
-        className="relative flex-grow h-4 bg-[#14171E] border border-[rgba(255,255,255,0.08)] cursor-pointer group flex items-center"
-      >
-        {/* Progress Fill */}
-        <div
-          className="absolute left-0 top-0 bottom-0 bg-[#FF5A1F]/30 border-r border-[#FF5A1F]"
-          style={{ width: `${currentRatio * 100}%` }}
+      {/* Scrubber track container */}
+      <div className="relative w-full h-5 flex items-center">
+        {/* Event ticks as glowing light points */}
+        <div className="absolute inset-0 pointer-events-none flex items-center">
+          {events.map((ev, i) => {
+            const pct = maxIdx > 0 ? (ev.frame_idx / maxIdx) * 100 : 0;
+            const isLatest = i === events.length - 1;
+            const color = ev.direction === 'IN' ? '#FFF1CC' : '#FF3B30';
+
+            return (
+              <div
+                key={i}
+                className="absolute w-1 h-3 -translate-x-1/2 rounded-full pointer-events-auto cursor-pointer"
+                style={{
+                  left: `${Math.min(99.5, Math.max(0.5, pct))}%`,
+                  backgroundColor: color,
+                  boxShadow: `0 0 ${isLatest ? '8px' : '4px'} ${color}`,
+                }}
+                title={`Frame ${ev.frame_idx}: ${ev.direction} ${ev.class}`}
+                onClick={() => onSeek(ev.frame_idx)}
+              />
+            );
+          })}
+        </div>
+
+        {/* Range input */}
+        <input
+          type="range"
+          min={sessionFrames[0]?.frame_idx || 0}
+          max={maxIdx}
+          value={currentIdx}
+          onChange={handleSliderChange}
+          disabled={isStreaming}
+          className="w-full h-1 bg-[rgba(236,232,246,0.14)] appearance-none cursor-pointer accent-[#7F5AF0] disabled:cursor-not-allowed z-10"
         />
-
-        {/* Playhead Pin */}
-        <div
-          className="absolute top-[-3px] bottom-[-3px] w-1 bg-[#FF5A1F] shadow-[0_0_4px_rgba(255,90,31,0.8)] z-10"
-          style={{ left: `calc(${currentRatio * 100}% - 2px)` }}
-        />
-
-        {/* Event Marker Ticks on Timeline */}
-        {events.map((ev, i) => {
-          const evRatio = Math.min(1, Math.max(0, ev.frame_idx / maxFrames));
-          const color =
-            ev.category === 'Pedestrian'
-              ? '#8EA695'
-              : ev.category === 'Cyclist'
-              ? '#B5A078'
-              : '#8E9DAE';
-
-          return (
-            <div
-              key={i}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSeek(ev.frame_idx);
-              }}
-              title={`Frame ${ev.frame_idx}: #${ev.track_id} ${ev.class.toUpperCase()} ${ev.direction}`}
-              className="absolute top-0 bottom-0 w-[2px] hover:w-[4px] hover:z-20 cursor-pointer transition-all"
-              style={{
-                left: `${evRatio * 100}%`,
-                backgroundColor: color,
-              }}
-            />
-          );
-        })}
       </div>
-
-      {/* Replay State Tag */}
-      {replayIndex !== null && (
-        <span className="px-1.5 py-0.5 bg-[#251A14] border border-[#FF5A1F]/40 text-[#FF5A1F] text-[9px] font-semibold tracking-wider flex-shrink-0">
-          REPLAY SEEK
-        </span>
-      )}
     </div>
   );
 };
