@@ -34,3 +34,8 @@ env/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Student submission files (private for Google Classroom)
+SUBMISSION_REPORT_FINAL.md
+ASSIGNMENT_REPORT.md
+
